@@ -44,12 +44,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
 import { useAtom } from "jotai";
-import {
-  emailAtom,
-  usernameAtom,
-  accountIDAtom,
-  avatarAtom,
-} from "@/store/users";
+import { emailAtom, usernameAtom, avatarAtom } from "@/store/users";
 
 const data = {
   navMain: [
