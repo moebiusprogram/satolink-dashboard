@@ -1,5 +1,15 @@
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
 import { TrendingUp } from "lucide-react";
+import AddressCards from "@/app/addressCards";
+import PaymentForm from "@/app/paymentForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   CartesianGrid,
   Dot,
@@ -44,6 +54,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "react-toastify";
+import { Button } from "./ui/button";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -302,16 +313,13 @@ export function SectionCards() {
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 lg:px-6">
         {/* Total Balance */}
-        <Card
-          className="text-center border-none bg-transparent 
-                   md:col-start-1 md:row-start-1 
-                   lg:col-start-3 lg:row-start-1">
+        <Card className="text-center border-none bg-transparent mx-auto">
           <CardHeader className="text-center">
             <CardDescription className="mb-5 text-center">
               Total balance
             </CardDescription>
             <CardTitle className="text-4xl font-normal tabular-nums">
-              $10.330.41
+              $10,330.41
             </CardTitle>
             <div className="w-full text-center">
               <Badge variant="outline" className="text-green-500 mx-auto">
@@ -320,6 +328,27 @@ export function SectionCards() {
               </Badge>
             </div>
           </CardHeader>
+          <CardFooter className="flex justify-center gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="w-48 lg:w-30 bg-blue-500 hover:bg-blue-700 active:bg-blue-900">
+                  Send
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-[#14161e]">
+                <DialogHeader>
+                  <DialogTitle>Send Payment to a Satolink User</DialogTitle>
+                  <DialogDescription>
+                    <PaymentForm onSubmit={console.log} />
+                  </DialogDescription>
+                </DialogHeader>
+                {/* Optional: Add your custom content or form here */}
+              </DialogContent>
+            </Dialog>
+            <Button className="w-48 lg:w-30 bg-green-600 hover:bg-green-400 active:bg-green-300  text-black">
+              Receive
+            </Button>
+          </CardFooter>
         </Card>
 
         {/* Lightning Network */}
@@ -578,30 +607,33 @@ export function SectionCards() {
         </div>
         <div>
           <h2 className="mb-4">Satolink address</h2>
-          <div
-            onClick={notify}
-            style={{
-              position: "relative",
-              height: "223px",
-              width: "150px",
-              backgroundImage: "url(/glass-editing.png)",
-              backgroundSize: "contain",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-            }}>
+          <div className="flex flex-row gap-5">
             <div
-              className="text-white"
+              onClick={notify}
               style={{
-                position: "absolute",
-                bottom: "25px",
-                fontSize: "14px",
-                left: "10px",
-                width: "130px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
+                position: "relative",
+                height: "223px",
+                width: "150px",
+                backgroundImage: "url(/glass-editing.png)",
+                backgroundSize: "contain",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "center",
               }}>
-              joel@satolink.com
+              <div
+                className="text-white"
+                style={{
+                  position: "absolute",
+                  bottom: "25px",
+                  fontSize: "14px",
+                  left: "10px",
+                  width: "130px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}>
+                joel@satolink.com
+              </div>
             </div>
+            <AddressCards />
           </div>
         </div>
       </div>

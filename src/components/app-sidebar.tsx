@@ -59,19 +59,19 @@ const data = {
       icon: IconLayoutDashboard,
     },
     {
-      name: "LNURL-Pay",
+      name: "LNURL Pay",
       url: "/pay",
       icon: IconScan,
     },
     {
-      name: "LNURL-Widthdraw",
+      name: "LNURL Widthdraw",
       url: "/widthdraw",
       icon: IconReceiptRefund,
     },
     {
-      name: "My SatoLink Wallet",
-      url: "wallet",
-      icon: IconWallet,
+      name: "Transactions",
+      url: "/transactions",
+      icon: IconArrowsLeftRight,
     },
   ],
   navClouds: [
@@ -135,11 +135,6 @@ const data = {
     },
   ],
   satolink: [
-    {
-      name: "Transactions",
-      url: "/transactions",
-      icon: IconArrowsLeftRight,
-    },
     {
       name: "BTC Invoices",
       url: "/btc-invoices",
