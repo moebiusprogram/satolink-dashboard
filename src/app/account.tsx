@@ -1,5 +1,6 @@
-import { Fade } from "react-awesome-reveal";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { toast } from "react-toastify";
 import {
   Form,
   FormControl,
@@ -24,19 +25,25 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import config from "@/config";
+
+const API_URL = config.API_URL;
 
 // Form schema using Zod for validation
 const accountFormSchema = z
   .object({
-    username: z.string().min(2, {
-      message: "Username must be at least 2 characters.",
+    username: z.string().min(5, {
+      message: "Username must be at least 5 characters.",
     }),
-    email: z.string().email({
+    email: z.email({
       message: "Please enter a valid email address.",
     }),
-    currentPassword: z.string().min(8, {
-      message: "Password must be at least 8 characters.",
-    }),
+    currentPassword: z
+      .string()
+      .min(8, {
+        message: "Password must be at least 8 characters.",
+      })
+      .optional(),
     newPassword: z
       .string()
       .min(8, {
@@ -49,9 +56,9 @@ const accountFormSchema = z
         message: "Password must be at least 8 characters.",
       })
       .optional(),
-    avatar: z.string().url().optional(),
-    twoFactorEnabled: z.boolean(),
-    notificationPreferences: z.enum(["all", "transactions-only", "none"]),
+    avatar: z.url().optional(),
+    twoFactor: z.boolean(),
+    notifications: z.enum(["all", "transactions", "none"]),
   })
   .refine(
     (data) => {
@@ -66,14 +73,14 @@ const accountFormSchema = z
     }
   );
 
+//The type in the form fields
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
-// Default values - in a real app these would come from user data
 const defaultValues: Partial<AccountFormValues> = {
-  username: "satoshi_nakamoto",
-  email: "satoshi@satolink.example",
-  twoFactorEnabled: false,
-  notificationPreferences: "all",
+  username: "",
+  email: "",
+  twoFactor: false,
+  notifications: "all",
   avatar: "https://github.com/shadcn.png",
 };
 
@@ -83,10 +90,78 @@ export default function AccountPage() {
     defaultValues,
   });
 
-  function onSubmit(data: AccountFormValues) {
-    console.log("Account settings saved:", data);
-    // Here you would typically send the data to your backend
-  }
+  const getAccountSettings = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_URL}/api/v1/accounts/get`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.account) {
+        return data.account;
+      } else {
+        return defaultValues;
+      }
+    } catch (error) {
+      console.error("Error fetching account settings:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchAccountSettings = async () => {
+      try {
+        const data = await getAccountSettings();
+        console.log("data", data);
+        form.reset(data);
+      } catch (error) {
+        console.error("Error fetching account settings:", error);
+      }
+    };
+
+    fetchAccountSettings();
+  }, [form]);
+
+  // function onSubmit(data: AccountFormValues) {
+  //   console.log("Account settings saved:", data);
+  //   // Here you would typically send the data to your backend
+  // }
+
+  const onSubmit = async (data: AccountFormValues) => {
+    const token = localStorage.getItem("token");
+    // if (!token) {
+    //   navigate("/login");
+    //   return;
+    // }
+
+    console.log("data:", data);
+
+    const response = await fetch(`${API_URL}/api/v1/accounts/set`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      toast.info("Account settings saved successfully");
+    } else {
+      toast.error("Error in saving the account settings");
+    }
+  };
 
   return (
     <div className="flex flex-1 flex-col">
@@ -223,7 +298,7 @@ export default function AccountPage() {
 
                     <FormField
                       control={form.control}
-                      name="twoFactorEnabled"
+                      name="twoFactor"
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
@@ -244,7 +319,7 @@ export default function AccountPage() {
                       )}
                     />
 
-                    {form.watch("twoFactorEnabled") && (
+                    {form.watch("twoFactor") && (
                       <div className="space-y-2">
                         <p className="text-sm font-medium">
                           Scan this QR code with your authenticator app
@@ -270,13 +345,13 @@ export default function AccountPage() {
 
                     <FormField
                       control={form.control}
-                      name="notificationPreferences"
+                      name="notifications"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Notification Level</FormLabel>
                           <Select
                             onValueChange={field.onChange}
-                            defaultValue={field.value}>
+                            value={field.value}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select notification preference" />
@@ -284,9 +359,9 @@ export default function AccountPage() {
                             </FormControl>
                             <SelectContent>
                               <SelectItem value="all">
-                                All notifications
+                                All Transactions
                               </SelectItem>
-                              <SelectItem value="transactions-only">
+                              <SelectItem value="transactions">
                                 Transactions only
                               </SelectItem>
                               <SelectItem value="none">

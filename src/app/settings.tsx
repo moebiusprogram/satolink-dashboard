@@ -70,10 +70,10 @@ export default function SettingsPage() {
     e.preventDefault();
 
     const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
+    // if (!token) {
+    //   navigate("/login");
+    //   return;
+    // }
 
     const booleanFields = [
       "saveTransactionHist",
